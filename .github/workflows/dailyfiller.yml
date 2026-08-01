@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Add filler log entry (only if nothing committed today)
-        if: steps.check.outputs.already_committed == 'false'
+       
         run: |
           echo "- ${{ steps.check.outputs.today }}: no code changes today, checking in." >> daily-log.md
           git config user.name "github-actions[bot]"
