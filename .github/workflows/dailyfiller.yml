@@ -1,0 +1,43 @@
+name: Daily Commit Keeper
+
+on:
+  schedule:
+    # Runs at 18:20 UTC = 23:50 IST every day.
+    # Adjust the UTC time if you want a different IST time (GitHub cron is UTC only).
+    - cron: '20 18 * * *'
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab to test
+
+permissions:
+  contents: write   # needed so the workflow can push a commit
+
+jobs:
+  fill-if-needed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so we can check the last commit date
+
+      - name: Check if a real commit already happened today
+        id: check
+        run: |
+          LAST_COMMIT_DATE=$(git log -1 --format=%cd --date=short)
+          TODAY=$(date -u +%Y-%m-%d)
+          echo "last_commit_date=$LAST_COMMIT_DATE" >> "$GITHUB_OUTPUT"
+          echo "today=$TODAY" >> "$GITHUB_OUTPUT"
+          if [ "$LAST_COMMIT_DATE" == "$TODAY" ]; then
+            echo "already_committed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_committed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Add filler log entry (only if nothing committed today)
+        if: steps.check.outputs.already_committed == 'false'
+        run: |
+          echo "- ${{ steps.check.outputs.today }}: no code changes today, checking in." >> daily-log.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add daily-log.md
+          git commit -m "Daily log: ${{ steps.check.outputs.today }}"
+          git push
