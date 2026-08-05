@@ -32,7 +32,7 @@ jobs:
             echo "already_committed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Add filler log entry (only if nothing committed today)
+      - name: Add filler log entry (only if nothing committed today) #NO DONE 
         if: steps.check.outputs.already_committed == 'false'
         run: |
           echo "- ${{ steps.check.outputs.today }}: no code changes today, checking in." >> daily-log.md
