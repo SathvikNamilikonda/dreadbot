@@ -3,7 +3,7 @@ name: Daily Commit Keeper
 on:
   schedule:
     # Every day at 2:00 PM IST
-    - cron: "30 8 * * *"
+    - cron: "37 8 * * *"
 
   # Allows manual testing
   workflow_dispatch:
